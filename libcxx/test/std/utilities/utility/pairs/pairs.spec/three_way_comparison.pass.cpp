@@ -6,6 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+// <utility>
+
+// template <class T1, class T2> struct pair
+
+// template <class T1, class T2> bool operator<=>(const pair<T1,T2>&, const pair<T1,T2>&);
+
 // UNSUPPORTED: c++03, c++11, c++14, c++17, libcpp-no-concepts
 
 #include <cassert>
@@ -38,7 +44,7 @@ int main(int, char**) {
     ASSERT_SAME_TYPE(std::weak_ordering, decltype(same));
   }
   {
-    // Pairs of int (strongly ordered) and double (partially ordered) should three-way compare with partial ordering.
+    // Pairs of int (strongly ordered) and double (partially ordered) should compare with partial ordering.
     static_assert((std::make_pair(1, 1.0) <=> std::make_pair(1, 2.0)) < 0, "");
     static_assert((std::make_pair(2, 1.0) <=> std::make_pair(1, 1.0)) > 0, "");
     static_assert((std::make_pair(std::numeric_limits<double>::quiet_NaN(), 1)

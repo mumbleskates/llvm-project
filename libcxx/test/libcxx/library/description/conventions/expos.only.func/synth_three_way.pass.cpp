@@ -33,7 +33,7 @@ int main(int, char**) {
     struct NoSpaceship {
       int value;
       constexpr bool operator==(const NoSpaceship&) const = default;
-      constexpr bool operator<(const NoSpaceship& other) const { return value < other.value; };
+      constexpr bool operator<(const NoSpaceship& other) const { return value < other.value; }
     };
     static_assert(NoSpaceship{1} < NoSpaceship{2}, "");
     static_assert(!(NoSpaceship{1} < NoSpaceship{1}), "");
@@ -46,7 +46,7 @@ int main(int, char**) {
     struct WithSpaceship {
       int value;
       constexpr bool operator==(const WithSpaceship&) const = default;
-      constexpr std::strong_ordering operator<=>(const WithSpaceship& other) const { return value <=> other.value; };
+      constexpr std::strong_ordering operator<=>(const WithSpaceship& other) const { return value <=> other.value; }
     };
     static_assert(WithSpaceship{1} < WithSpaceship{2}, "");
     static_assert(!(WithSpaceship{1} < WithSpaceship{1}), "");
@@ -80,7 +80,9 @@ int main(int, char**) {
     // Types with operator<=> but no operator== are not three_way_comparable and will fall back to operator< and
     // compare as weakly ordered.
     struct SpaceshipNoEquals {
-      constexpr std::strong_ordering operator<=>(const SpaceshipNoEquals&) const { return std::strong_ordering::equivalent; }
+      constexpr std::strong_ordering operator<=>(const SpaceshipNoEquals&) const {
+        return std::strong_ordering::equivalent;
+      }
       constexpr bool operator<(const SpaceshipNoEquals&) const { return false; }
     };
     static_assert(std::__synth_three_way(SpaceshipNoEquals{}, SpaceshipNoEquals{}) == std::weak_ordering::equivalent, "");

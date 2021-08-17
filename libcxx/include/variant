@@ -165,6 +165,10 @@ namespace std {
   template <class... Types>
   constexpr bool operator>=(const variant<Types...>&, const variant<Types...>&);
 
+  template <class... Types>
+  constexpr common_comparison_category_t<compare_three_way_result_t<Types>...>
+    operator<=>(const variant<Types...>&, const variant<Types...>&);           // since C++20
+
   // 20.7.6, visitation
   template <class Visitor, class... Variants>
   constexpr see below visit(Visitor&&, Variants&&...);
@@ -201,6 +205,9 @@ namespace std {
 
 #include <__assert> // all public C++ headers provide the assertion handler
 #include <__availability>
+#include <__compare/common_comparison_category.h>
+#include <__compare/compare_three_way_result.h>
+#include <__compare/three_way_comparable.h>
 #include <__config>
 #include <__functional/hash.h>
 #include <__functional/operations.h>
@@ -1629,6 +1636,24 @@ constexpr bool operator==(const variant<_Types...>& __lhs,
   if (__lhs.valueless_by_exception()) return true;
   return __variant::__visit_value_at(__lhs.index(), __convert_to_bool<equal_to<>>{}, __lhs, __rhs);
 }
+
+#if _LIBCPP_STD_VERSION > 17 && !defined(_LIBCPP_HAS_NO_SPACESHIP_OPERATOR) && !defined(_LIBCPP_HAS_NO_CONCEPTS)
+
+template <class... _Types> requires (three_way_comparable<_Types> && ...)
+inline _LIBCPP_INLINE_VISIBILITY constexpr
+common_comparison_category_t<compare_three_way_result_t<_Types>...>
+operator<=>(const variant<_Types...>& __lhs,
+            const variant<_Types...>& __rhs) {
+  using __variant_detail::__visitation::__variant;
+  if (__lhs.valueless_by_exception() && __rhs.valueless_by_exception()) return strong_ordering::equal;
+  if (__lhs.valueless_by_exception()) return strong_ordering::less;
+  if (__rhs.valueless_by_exception()) return strong_ordering::greater;
+  if (auto __c = __lhs.index() <=> __rhs.index(); __c != 0) return __c;
+  auto __three_way = []<class _Type>(const _Type& __v, const _Type& __w) { return __v <=> __w; };
+  return __variant::__visit_value_at(__lhs.index(), __three_way, __lhs, __rhs);
+}
+
+#endif // _LIBCPP_STD_VERSION > 17 && !defined(_LIBCPP_HAS_NO_SPACESHIP_OPERATOR) && !defined(_LIBCPP_HAS_NO_CONCEPTS)
 
 template <class... _Types>
 inline _LIBCPP_INLINE_VISIBILITY

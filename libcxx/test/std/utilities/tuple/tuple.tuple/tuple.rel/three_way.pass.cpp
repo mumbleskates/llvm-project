@@ -16,6 +16,7 @@
 
 // UNSUPPORTED: c++03, c++11, c++14, c++17, libcpp-no-concepts
 
+#include <cassert>
 #include <compare>
 #include <limits>
 #include <tuple>
@@ -77,8 +78,9 @@ int main(int, char**)
         static_assert((T1(1) <=> T2(1)) == std::partial_ordering::equivalent, "");
         static_assert((T1(1) <=> T2(0.9)) == std::partial_ordering::greater, "");
         static_assert((T1(1) <=> T2(1.1)) == std::partial_ordering::less, "");
-        static_assert((T1(1) <=> T2(std::numeric_limits<double>::quiet_NaN()))
-                      == std::partial_ordering::unordered, "");
+        // Comparisons with NaN are non-constexpr in GCC
+        assert((T1(1) <=> T2(std::numeric_limits<double>::quiet_NaN()))
+                      == std::partial_ordering::unordered);
     }
     {
         typedef std::tuple<long, float> T1;
@@ -89,10 +91,11 @@ int main(int, char**)
         static_assert((T1(1, 2) <=> T2(1.1, 2)) == std::partial_ordering::less, "");
         static_assert((T1(1, 2) <=> T2(1, 1)) == std::partial_ordering::greater, "");
         static_assert((T1(1, 2) <=> T2(1, 3)) == std::partial_ordering::less, "");
-        static_assert((T1(1, 2) <=> T2(std::numeric_limits<double>::quiet_NaN(), 2))
-                      == std::partial_ordering::unordered, "");
-        static_assert((T1(1, std::numeric_limits<float>::quiet_NaN()) <=> T2(1, 2))
-                      == std::partial_ordering::unordered, "");
+        // Comparisons with NaN are non-constexpr in GCC
+        assert((T1(1, 2) <=> T2(std::numeric_limits<double>::quiet_NaN(), 2))
+                      == std::partial_ordering::unordered);
+        assert((T1(1, std::numeric_limits<float>::quiet_NaN()) <=> T2(1, 2))
+                      == std::partial_ordering::unordered);
     }
     {
         typedef std::tuple<short, float, double> T1;
@@ -105,12 +108,13 @@ int main(int, char**)
         static_assert((T1(1, 2, 3) <=> T2(1, 3, 3)) == std::partial_ordering::less, "");
         static_assert((T1(1, 2, 3) <=> T2(1, 2, 2)) == std::partial_ordering::greater, "");
         static_assert((T1(1, 2, 3) <=> T2(1, 2, 4)) == std::partial_ordering::less, "");
-        static_assert((T1(1, 2, 3) <=> T2(std::numeric_limits<double>::quiet_NaN(), 2, 3))
-                      == std::partial_ordering::unordered, "");
-        static_assert((T1(1, std::numeric_limits<float>::quiet_NaN(), 3) <=> T2(1, 2, 3))
-                      == std::partial_ordering::unordered, "");
-        static_assert((T1(1, 2, std::numeric_limits<double>::quiet_NaN()) <=> T2(1, 2, 3))
-                      == std::partial_ordering::unordered, "");
+        // Comparisons with NaN are non-constexpr in GCC
+        assert((T1(1, 2, 3) <=> T2(std::numeric_limits<double>::quiet_NaN(), 2, 3))
+                      == std::partial_ordering::unordered);
+        assert((T1(1, std::numeric_limits<float>::quiet_NaN(), 3) <=> T2(1, 2, 3))
+                      == std::partial_ordering::unordered);
+        assert((T1(1, 2, std::numeric_limits<double>::quiet_NaN()) <=> T2(1, 2, 3))
+                      == std::partial_ordering::unordered);
     }
     // Ordering classes and synthesized three way comparison
     {

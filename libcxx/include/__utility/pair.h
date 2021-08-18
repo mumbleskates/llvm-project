@@ -321,7 +321,7 @@ operator==(const pair<_T1,_T2>& __x, const pair<_T1,_T2>& __y)
 #if _LIBCPP_STD_VER > 17 && !defined(_LIBCPP_HAS_NO_SPACESHIP_OPERATOR) && !defined(_LIBCPP_HAS_NO_CONCEPTS)
 
 template <class _T1, class _T2>
-inline _LIBCPP_INLINE_VISIBILITY constexpr
+_LIBCPP_HIDE_FROM_ABI constexpr
 common_comparison_category_t<
         __synth_three_way_result<_T1>,
         __synth_three_way_result<_T2> >

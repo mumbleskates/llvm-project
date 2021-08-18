@@ -25,7 +25,6 @@
 // A custom three-way result type
 struct CustomResult {
   friend constexpr bool operator==(int, const CustomResult&) noexcept { return true; }
-  friend constexpr bool operator==(const CustomResult&, int) noexcept { return true; }
   friend constexpr bool operator<(int, const CustomResult&) noexcept { return false; }
   friend constexpr bool operator<(const CustomResult&, int) noexcept { return false; }
 };

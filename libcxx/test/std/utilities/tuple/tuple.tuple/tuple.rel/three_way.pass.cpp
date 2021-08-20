@@ -24,10 +24,10 @@
 #include "test_macros.h"
 
 // A custom three-way result type
-struct CustomResult {
-  friend constexpr bool operator==(int, const CustomResult&) noexcept { return true; }
-  friend constexpr bool operator<(int, const CustomResult&) noexcept { return false; }
-  friend constexpr bool operator<(const CustomResult&, int) noexcept { return false; }
+struct CustomEquality {
+  friend constexpr bool operator==(const CustomEquality&, int) noexcept { return true; }
+  friend constexpr bool operator<(const CustomEquality&, int) noexcept { return false; }
+  friend constexpr bool operator<(int, const CustomEquality&) noexcept { return false; }
 };
 
 int main(int, char**)
@@ -168,7 +168,7 @@ int main(int, char**)
     }
     {
         struct CustomSpaceship {
-            constexpr CustomResult operator<=>(const CustomSpaceship&) const { return CustomResult(); }
+            constexpr CustomEquality operator<=>(const CustomSpaceship&) const { return CustomEquality(); }
         };
         typedef std::tuple<int, int, CustomSpaceship> T1;
         typedef std::tuple<short, long, CustomSpaceship> T2;
@@ -177,5 +177,5 @@ int main(int, char**)
         ASSERT_SAME_TYPE(decltype(T1() <=> T2()), std::weak_ordering);
     }
 
-  return 0;
+    return 0;
 }

@@ -18,11 +18,11 @@
 
 #include <tuple>
 
-#include "test_macros.h"
+template <class T, class U>
+concept can_compare = requires(T t, U u) { t <=> u; };
 
-int main(int, char**)
-{
-  static_cast<void>(std::tuple<int>(1) <=> std::tuple<int, long>(1, 2)); // expected-error {{invalid operands to binary expression}}
-  static_cast<void>(std::tuple<int, long>(1, 2) <=> std::tuple<int>(1)); // expected-error {{invalid operands to binary expression}}
-  return 0;
-}
+typedef std::tuple<int> T1;
+typedef std::tuple<int, long> T2;
+
+static_assert(!can_compare<T1, T2>, "");
+static_assert(!can_compare<T2, T1>, "");

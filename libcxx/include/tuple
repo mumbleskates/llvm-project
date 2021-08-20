@@ -1320,7 +1320,7 @@ __tuple_compare_three_way(const tuple<_Tp...>& __x, const tuple<_Up...>& __y, in
 }
 
 template <class ..._Tp, class ..._Up>
-requires (sizeof...(_Tp) == sizeof...(_Up))  // return type is ill-formed for non-matching sizes
+requires (sizeof...(_Tp) == sizeof...(_Up))
 _LIBCPP_HIDE_FROM_ABI constexpr
 common_comparison_category_t<__synth_three_way_result<_Tp, _Up>...>
 operator<=>(const tuple<_Tp...>& __x, const tuple<_Up...>& __y)

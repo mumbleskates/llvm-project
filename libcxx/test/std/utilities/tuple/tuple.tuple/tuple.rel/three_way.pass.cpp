@@ -161,9 +161,11 @@ constexpr bool test() {
     };
     typedef std::tuple<int, unsigned int, CustomSpaceship> T1;
     typedef std::tuple<short, unsigned long, CustomSpaceship> T2;
+    typedef std::tuple<CustomSpaceship> T3;
     // Custom three way return types cannot be used in synthesized three way comparison,
     // but they can be used for (rewritten) operator< when synthesizing a weak ordering.
     ASSERT_SAME_TYPE(decltype(T1() <=> T2()), std::weak_ordering);
+    ASSERT_SAME_TYPE(decltype(T3() <=> T3()), std::weak_ordering);
   }
 
   return true;

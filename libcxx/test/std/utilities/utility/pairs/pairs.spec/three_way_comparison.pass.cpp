@@ -15,16 +15,17 @@
 // UNSUPPORTED: c++03, c++11, c++14, c++17, libcpp-no-concepts
 
 #include <cassert>
+#include <compare>
 #include <limits>
 #include <utility>
 
 #include "test_macros.h"
 
-int main(int, char**) {
+constexpr bool test() {
   {
     // Pairs of types that both have strong ordering should compare with strong ordering.
-    static_assert((std::make_pair(1, 1) <=> std::make_pair(1, 2)) < 0, "");
-    static_assert((std::make_pair(2, 1) <=> std::make_pair(1, 2)) > 0, "");
+    assert((std::make_pair(1, 1) <=> std::make_pair(1, 2)) < 0);
+    assert((std::make_pair(2, 1) <=> std::make_pair(1, 2)) > 0);
     auto same = std::make_pair(0, 0) <=> std::make_pair(0, 0);
     assert(same == 0);
     ASSERT_SAME_TYPE(std::strong_ordering, decltype(same));
@@ -36,23 +37,30 @@ int main(int, char**) {
       constexpr bool operator==(const NoSpaceship&) const = default;
       constexpr bool operator<(const NoSpaceship& other) const { return value < other.value; }
     };
-    static_assert((std::make_pair(1, NoSpaceship{1}) <=> std::make_pair(1, NoSpaceship{2})) < 0, "");
-    static_assert((std::make_pair(2, NoSpaceship{1}) <=> std::make_pair(1, NoSpaceship{2})) > 0, "");
+    assert((std::make_pair(1, NoSpaceship{1}) <=> std::make_pair(1, NoSpaceship{2})) < 0);
+    assert((std::make_pair(2, NoSpaceship{1}) <=> std::make_pair(1, NoSpaceship{2})) > 0);
     auto same = std::make_pair(0, NoSpaceship{0}) <=> std::make_pair(0, NoSpaceship{0});
     assert(same == 0);
     ASSERT_SAME_TYPE(std::weak_ordering, decltype(same));
   }
   {
     // Pairs of int (strongly ordered) and double (partially ordered) should compare with partial ordering.
-    static_assert((std::make_pair(1, 1.0) <=> std::make_pair(1, 2.0)) < 0, "");
-    static_assert((std::make_pair(2, 1.0) <=> std::make_pair(1, 1.0)) > 0, "");
-    static_assert((std::make_pair(std::numeric_limits<double>::quiet_NaN(), 1)
+    assert((std::make_pair(1, 1.0) <=> std::make_pair(1, 2.0)) < 0);
+    assert((std::make_pair(2, 1.0) <=> std::make_pair(1, 1.0)) > 0);
+    assert((std::make_pair(std::numeric_limits<double>::quiet_NaN(), 1)
                    <=> std::make_pair(std::numeric_limits<double>::quiet_NaN(), 2))
-                  == std::partial_ordering::unordered, "");
+                  == std::partial_ordering::unordered);
     auto same = std::make_pair(0, 0.0) <=> std::make_pair(0, 0.0);
     assert(same == 0);
     ASSERT_SAME_TYPE(std::partial_ordering, decltype(same));
   }
+
+  return true;
+}
+
+int main(int, char**) {
+  static_assert(test());
+  assert(test());
 
   return 0;
 }

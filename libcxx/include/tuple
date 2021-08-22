@@ -1315,7 +1315,7 @@ _LIBCPP_HIDE_FROM_ABI constexpr
 auto
 __tuple_compare_three_way(const tuple<_Tp...>& __x, const tuple<_Up...>& __y, index_sequence<_Is...>) {
     common_comparison_category_t<__synth_three_way_result<_Tp, _Up>...> __result = strong_ordering::equal;
-    static_cast<void>(((__result = _VSTD::__synth_three_way(get<_Is>(__x), get<_Is>(__y)), __result != 0) || ...));
+    static_cast<void>(((__result = _VSTD::__synth_three_way(_VSTD::get<_Is>(__x), _VSTD::get<_Is>(__y)), __result != 0) || ...));
     return __result;
 }
 

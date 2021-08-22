@@ -132,11 +132,11 @@ template <class T1, class... T>
 
 // 20.4.1.6, relational operators:
 template<class... T, class... U> bool operator==(const tuple<T...>&, const tuple<U...>&); // constexpr in C++14
-template<class... T, class... U> bool operator<(const tuple<T...>&, const tuple<U...>&);  // constexpr in C++14, until C++20
-template<class... T, class... U> bool operator!=(const tuple<T...>&, const tuple<U...>&); // constexpr in C++14, until C++20
-template<class... T, class... U> bool operator>(const tuple<T...>&, const tuple<U...>&);  // constexpr in C++14, until C++20
-template<class... T, class... U> bool operator<=(const tuple<T...>&, const tuple<U...>&); // constexpr in C++14, until C++20
-template<class... T, class... U> bool operator>=(const tuple<T...>&, const tuple<U...>&); // constexpr in C++14, until C++20
+template<class... T, class... U> bool operator<(const tuple<T...>&, const tuple<U...>&);  // constexpr in C++14, removed in C++20
+template<class... T, class... U> bool operator!=(const tuple<T...>&, const tuple<U...>&); // constexpr in C++14, removed in C++20
+template<class... T, class... U> bool operator>(const tuple<T...>&, const tuple<U...>&);  // constexpr in C++14, removed in C++20
+template<class... T, class... U> bool operator<=(const tuple<T...>&, const tuple<U...>&); // constexpr in C++14, removed in C++20
+template<class... T, class... U> bool operator>=(const tuple<T...>&, const tuple<U...>&); // constexpr in C++14, removed in C++20
 template<class... T, class... U>
   constexpr common_comparison_category_t<synth-three-way-result<T, U>...>
     operator<=>(const tuple<T...>&, const tuple<U...>&);                                  // since C++20

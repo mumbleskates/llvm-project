@@ -122,7 +122,7 @@ constexpr bool test() {
            == std::partial_ordering::unordered);
     assert((T1(1, std::numeric_limits<float>::quiet_NaN(), 3) <=> T2(1, std::numeric_limits<double>::quiet_NaN(), 3))
            == std::partial_ordering::unordered);
-    assert((T1(1, 2, std::numeric_limits<float>::quiet_NaN()) <=> T2(1, 2, std::numeric_limits<float>::quiet_NaN())))
+    assert((T1(1, 2, std::numeric_limits<float>::quiet_NaN()) <=> T2(1, 2, std::numeric_limits<float>::quiet_NaN()))
            == std::partial_ordering::unordered);
   }
   // Ordering classes and synthesized three way comparison

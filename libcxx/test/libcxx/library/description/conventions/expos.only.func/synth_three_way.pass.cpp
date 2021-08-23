@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 // UNSUPPORTED: c++03, c++11, c++14, c++17, libcpp-no-concepts
+// ADDITIONAL_COMPILE_FLAGS: -Wno-sign-compare
 
 // template<class T, class U> auto __synth_three_way(T __t, U __u);
 
@@ -98,6 +99,19 @@ constexpr bool test() {
     assert(!(CustomSpaceship() < CustomSpaceship()));
     assert(std::__synth_three_way(CustomSpaceship(), CustomSpaceship()) == std::weak_ordering::equivalent);
     ASSERT_SAME_TYPE(std::weak_ordering, std::__synth_three_way_result<CustomSpaceship, CustomSpaceship>);
+  }
+  {
+    assert(std::__synth_three_way(1, 1U) == std::weak_ordering::equivalent);
+    assert(std::__synth_three_way(-1, 0U) == std::weak_ordering::greater);
+    // Even with the warning suppressed (-Wno-sign-compare) there should still be no <=> operator
+    // between signed and unsigned types, so we should end up with a synthesized weak ordering.
+    ASSERT_SAME_TYPE(std::weak_ordering, std::__synth_three_way_result<int, unsigned int>);
+    // When an unsigned type can be narrowed to a larger signed type, <=> should be defined and we
+    // should get a strong ordering. (This probably does not raise a warning due to safe narrowing.)
+    assert((static_cast<long long int>(-1) <=> static_cast<unsigned char>(0)) == std::strong_ordering::less);
+    assert(std::__synth_three_way(static_cast<long long int>(-1),
+                                  static_cast<unsigned char>(0)) == std::strong_ordering::less);
+    ASSERT_SAME_TYPE(std::strong_ordering, std::__synth_three_way_result<long long int, unsigned char>);
   }
 
   return true;

@@ -15,6 +15,7 @@
 //   operator<=>(const tuple<TTypes...>& t, const tuple<UTypes...>& u);
 
 // UNSUPPORTED: c++03, c++11, c++14, c++17, libcpp-no-concepts
+// ADDITIONAL_COMPILE_FLAGS: -Wno-sign-compare
 
 #include <cassert>
 #include <compare>
@@ -182,6 +183,13 @@ constexpr bool test() {
     // but they can be used for (rewritten) operator< when synthesizing a weak ordering.
     ASSERT_SAME_TYPE(decltype(T1() <=> T2()), std::weak_ordering);
     ASSERT_SAME_TYPE(decltype(T3() <=> T3()), std::weak_ordering);
+  }
+  {
+    typedef std::tuple<long, int> T1;
+    typedef std::tuple<long, unsigned int> T2;
+    // Even with the warning suppressed (-Wno-sign-compare) there should still be no <=> operator
+    // between signed and unsigned types, so we should end up with a synthesized weak ordering.
+    ASSERT_SAME_TYPE(decltype(T1() <=> T2()), std::weak_ordering);
   }
 
   return true;

@@ -77,8 +77,6 @@ constexpr bool test() {
     assert((T1(1) <=> T2(1)) == std::partial_ordering::equivalent);
     assert((T1(1) <=> T2(0.9)) == std::partial_ordering::greater);
     assert((T1(1) <=> T2(1.1)) == std::partial_ordering::less);
-    // Comparisons with NaN are non-constexpr in GCC
-    assert((T1(1) <=> T2(std::numeric_limits<double>::quiet_NaN())) == std::partial_ordering::unordered);
   }
   {
     typedef std::tuple<long, float> T1;
@@ -89,9 +87,6 @@ constexpr bool test() {
     assert((T1(1, 2) <=> T2(1.1, 2)) == std::partial_ordering::less);
     assert((T1(1, 2) <=> T2(1, 1)) == std::partial_ordering::greater);
     assert((T1(1, 2) <=> T2(1, 3)) == std::partial_ordering::less);
-    // Comparisons with NaN are non-constexpr in GCC
-    assert((T1(1, 2) <=> T2(std::numeric_limits<double>::quiet_NaN(), 2)) == std::partial_ordering::unordered);
-    assert((T1(1, std::numeric_limits<float>::quiet_NaN()) <=> T2(1, 2)) == std::partial_ordering::unordered);
   }
   {
     typedef std::tuple<short, float, double> T1;
@@ -104,10 +99,31 @@ constexpr bool test() {
     assert((T1(1, 2, 3) <=> T2(1, 3, 3)) == std::partial_ordering::less);
     assert((T1(1, 2, 3) <=> T2(1, 2, 2)) == std::partial_ordering::greater);
     assert((T1(1, 2, 3) <=> T2(1, 2, 4)) == std::partial_ordering::less);
-    // Comparisons with NaN are non-constexpr in GCC
-    assert((T1(1, 2, 3) <=> T2(std::numeric_limits<double>::quiet_NaN(), 2, 3)) == std::partial_ordering::unordered);
-    assert((T1(1, std::numeric_limits<float>::quiet_NaN(), 3) <=> T2(1, 2, 3)) == std::partial_ordering::unordered);
-    assert((T1(1, 2, std::numeric_limits<double>::quiet_NaN()) <=> T2(1, 2, 3)) == std::partial_ordering::unordered);
+  }
+  {
+    typedef std::tuple<float> T1;
+    typedef std::tuple<double> T2;
+    // Comparisons with NaN and non-NaN are non-constexpr in GCC, so both sides must be NaN
+    assert((T1(std::numeric_limits<float>::quiet_NaN()) <=> T2(std::numeric_limits<double>::quiet_NaN()))
+           == std::partial_ordering::unordered);
+  }
+  {
+    typedef std::tuple<double, double> T1;
+    typedef std::tuple<float, float> T2;
+    assert((T1(std::numeric_limits<double>::quiet_NaN(), 2) <=> T2(std::numeric_limits<float>::quiet_NaN(), 2))
+           == std::partial_ordering::unordered);
+    assert((T1(1, std::numeric_limits<double>::quiet_NaN()) <=> T2(1, std::numeric_limits<float>::quiet_NaN()))
+           == std::partial_ordering::unordered);
+  }
+  {
+    typedef std::tuple<double, float, float> T1;
+    typedef std::tuple<double, double, float> T2;
+    assert((T1(std::numeric_limits<double>::quiet_NaN(), 2, 3) <=> T2(std::numeric_limits<double>::quiet_NaN(), 2, 3))
+           == std::partial_ordering::unordered);
+    assert((T1(1, std::numeric_limits<float>::quiet_NaN(), 3) <=> T2(1, std::numeric_limits<double>::quiet_NaN(), 3))
+           == std::partial_ordering::unordered);
+    assert((T1(1, 2, std::numeric_limits<float>::quiet_NaN()) <=> T2(1, 2, std::numeric_limits<float>::quiet_NaN())))
+           == std::partial_ordering::unordered);
   }
   // Ordering classes and synthesized three way comparison
   {

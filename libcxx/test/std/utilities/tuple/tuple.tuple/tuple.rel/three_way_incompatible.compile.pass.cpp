@@ -24,5 +24,5 @@ concept can_compare = requires(T t, U u) { t <=> u; };
 typedef std::tuple<int> T1;
 typedef std::tuple<int, long> T2;
 
-static_assert(!can_compare<T1, T2>, "");
-static_assert(!can_compare<T2, T1>, "");
+static_assert(!can_compare<T1, T2>);
+static_assert(!can_compare<T2, T1>);

@@ -9,7 +9,7 @@
 // UNSUPPORTED: c++03, c++11, c++14, c++17, libcpp-no-concepts
 // ADDITIONAL_COMPILE_FLAGS: -Wno-sign-compare
 
-// template<class T, class U> auto __synth_three_way(T __t, U __u);
+// constexpr auto __synth_three_way = ...;
 
 #include <cassert>
 #include <compare>

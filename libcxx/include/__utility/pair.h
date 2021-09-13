@@ -320,6 +320,8 @@ operator==(const pair<_T1,_T2>& __x, const pair<_T1,_T2>& __y)
 
 #if _LIBCPP_STD_VER > 17 && !defined(_LIBCPP_HAS_NO_SPACESHIP_OPERATOR) && !defined(_LIBCPP_HAS_NO_CONCEPTS)
 
+// [pairs.spec], specialized algorithms
+
 template <class _T1, class _T2>
 _LIBCPP_HIDE_FROM_ABI constexpr
 common_comparison_category_t<

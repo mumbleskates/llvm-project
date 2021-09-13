@@ -18,6 +18,8 @@
 
 #include "test_macros.h"
 
+template <typename T> concept can_synth_three_way = requires(T t) { std::__synth_three_way(t, t); };
+
 // A custom three-way result type
 struct CustomEquality {
   friend constexpr bool operator==(const CustomEquality&, int) noexcept { return true; }
@@ -26,54 +28,73 @@ struct CustomEquality {
 };
 
 constexpr bool test() {
-  assert(std::__synth_three_way(1, 2) == std::strong_ordering::less);
-  ASSERT_SAME_TYPE(std::strong_ordering, std::__synth_three_way_result<int, int>);
-
+  {
+    assert(std::__synth_three_way(1, 1) == std::strong_ordering::equal);
+    assert(std::__synth_three_way(2, 1) == std::strong_ordering::greater);
+    assert(std::__synth_three_way(1, 2) == std::strong_ordering::less);
+    ASSERT_SAME_TYPE(std::strong_ordering, std::__synth_three_way_result<int, int>);
+    ASSERT_SAME_TYPE(std::strong_ordering, std::__synth_three_way_result<short, long long int>);
+  }
+  {
+    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
+    assert(std::__synth_three_way(1.0, 1.0) == std::partial_ordering::equivalent);
+    assert(std::__synth_three_way(2.0, 1.0) == std::partial_ordering::greater);
+    assert(std::__synth_three_way(1.0, 2.0) == std::partial_ordering::less);
+    assert(std::__synth_three_way(nan, nan) == std::partial_ordering::unordered);
+    ASSERT_SAME_TYPE(std::partial_ordering, std::__synth_three_way_result<double, double>);
+    ASSERT_SAME_TYPE(std::partial_ordering, std::__synth_three_way_result<double, float>);
+    ASSERT_SAME_TYPE(std::partial_ordering, std::__synth_three_way_result<double, int>);
+    ASSERT_SAME_TYPE(std::partial_ordering, std::__synth_three_way_result<float, short>);
+  }
+  {
+    struct StrongSpaceship {
+      int value;
+      constexpr bool operator==(const StrongSpaceship&) const = default;
+      constexpr std::strong_ordering operator<=>(const StrongSpaceship& other) const { return value <=> other.value; }
+    };
+    assert(std::__synth_three_way(StrongSpaceship{1}, StrongSpaceship{1}) == std::strong_ordering::equal);
+    assert(std::__synth_three_way(StrongSpaceship{2}, StrongSpaceship{1}) == std::strong_ordering::greater);
+    assert(std::__synth_three_way(StrongSpaceship{1}, StrongSpaceship{2}) == std::strong_ordering::less);
+    ASSERT_SAME_TYPE(std::strong_ordering, std::__synth_three_way_result<StrongSpaceship, StrongSpaceship>);
+  }
+  {
+    struct WeakSpaceship {
+      int value;
+      constexpr bool operator==(const WeakSpaceship&) const = default;
+      constexpr std::weak_ordering operator<=>(const WeakSpaceship& other) const {
+        return value <=> other.value;
+      }
+    };
+    assert(std::__synth_three_way(WeakSpaceship{1}, WeakSpaceship{1}) == std::weak_ordering::equivalent);
+    assert(std::__synth_three_way(WeakSpaceship{2}, WeakSpaceship{1}) == std::weak_ordering::greater);
+    assert(std::__synth_three_way(WeakSpaceship{1}, WeakSpaceship{2}) == std::weak_ordering::less);
+    ASSERT_SAME_TYPE(std::weak_ordering, std::__synth_three_way_result<WeakSpaceship, WeakSpaceship>);
+  }
+  {
+    struct PartialSpaceship {
+      double value;
+      constexpr bool operator==(const PartialSpaceship&) const = default;
+      constexpr std::partial_ordering operator<=>(const PartialSpaceship& other) const {
+        return value <=> other.value;
+      }
+    };
+    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
+    assert(std::__synth_three_way(PartialSpaceship{1.0}, PartialSpaceship{1.0}) == std::partial_ordering::equivalent);
+    assert(std::__synth_three_way(PartialSpaceship{2.0}, PartialSpaceship{1.0}) == std::partial_ordering::greater);
+    assert(std::__synth_three_way(PartialSpaceship{1.0}, PartialSpaceship{2.0}) == std::partial_ordering::less);
+    assert(std::__synth_three_way(PartialSpaceship{nan}, PartialSpaceship{nan}) == std::partial_ordering::unordered);
+    ASSERT_SAME_TYPE(std::partial_ordering, std::__synth_three_way_result<PartialSpaceship, PartialSpaceship>);
+  }
   {
     struct NoSpaceship {
       int value;
       constexpr bool operator==(const NoSpaceship&) const = default;
       constexpr bool operator<(const NoSpaceship& other) const { return value < other.value; }
     };
-    assert(NoSpaceship{1} < NoSpaceship{2});
-    assert(!(NoSpaceship{1} < NoSpaceship{1}));
     assert(std::__synth_three_way(NoSpaceship{1}, NoSpaceship{1}) == std::weak_ordering::equivalent);
     assert(std::__synth_three_way(NoSpaceship{2}, NoSpaceship{1}) == std::weak_ordering::greater);
     assert(std::__synth_three_way(NoSpaceship{1}, NoSpaceship{2}) == std::weak_ordering::less);
     ASSERT_SAME_TYPE(std::weak_ordering, std::__synth_three_way_result<NoSpaceship, NoSpaceship>);
-  }
-  {
-    struct WithSpaceship {
-      int value;
-      constexpr bool operator==(const WithSpaceship&) const = default;
-      constexpr std::strong_ordering operator<=>(const WithSpaceship& other) const { return value <=> other.value; }
-    };
-    assert(WithSpaceship{1} < WithSpaceship{2});
-    assert(!(WithSpaceship{1} < WithSpaceship{1}));
-    assert(std::__synth_three_way(WithSpaceship{1}, WithSpaceship{1}) == std::strong_ordering::equivalent);
-    assert(std::__synth_three_way(WithSpaceship{2}, WithSpaceship{1}) == std::strong_ordering::greater);
-    assert(std::__synth_three_way(WithSpaceship{1}, WithSpaceship{2}) == std::strong_ordering::less);
-    ASSERT_SAME_TYPE(std::strong_ordering, std::__synth_three_way_result<WithSpaceship, WithSpaceship>);
-  }
-  {
-    struct WithPartialSpaceship {
-      double value;
-      constexpr bool operator==(const WithPartialSpaceship&) const = default;
-      constexpr std::partial_ordering operator<=>(const WithPartialSpaceship& other) const {
-        return value <=> other.value;
-      }
-    };
-    assert(WithPartialSpaceship{1.0} < WithPartialSpaceship{2.0});
-    assert(!(WithPartialSpaceship{1.0} < WithPartialSpaceship{1.0}));
-    assert(std::__synth_three_way(WithPartialSpaceship{1.0}, WithPartialSpaceship{1.0}) ==
-           std::partial_ordering::equivalent);
-    assert(std::__synth_three_way(WithPartialSpaceship{2.0}, WithPartialSpaceship{1.0}) ==
-           std::partial_ordering::greater);
-    assert(std::__synth_three_way(WithPartialSpaceship{1.0}, WithPartialSpaceship{2.0}) == std::partial_ordering::less);
-    assert(std::__synth_three_way(WithPartialSpaceship{std::numeric_limits<double>::quiet_NaN()},
-                                  WithPartialSpaceship{std::numeric_limits<double>::quiet_NaN()}) ==
-           std::partial_ordering::unordered);
-    ASSERT_SAME_TYPE(std::partial_ordering, std::__synth_three_way_result<WithPartialSpaceship, WithPartialSpaceship>);
   }
   {
     // Types with operator<=> but no operator== are not three_way_comparable and will fall back to operator< and
@@ -82,7 +103,6 @@ constexpr bool test() {
       constexpr std::strong_ordering operator<=>(const SpaceshipNoEquals&) const {
         return std::strong_ordering::equivalent;
       }
-      constexpr bool operator<(const SpaceshipNoEquals&) const { return false; }
     };
     assert(std::__synth_three_way(SpaceshipNoEquals{}, SpaceshipNoEquals{}) == std::weak_ordering::equivalent);
     ASSERT_SAME_TYPE(std::weak_ordering, std::__synth_three_way_result<SpaceshipNoEquals, SpaceshipNoEquals>);
@@ -99,6 +119,22 @@ constexpr bool test() {
     assert(!(CustomSpaceship() < CustomSpaceship()));
     assert(std::__synth_three_way(CustomSpaceship(), CustomSpaceship()) == std::weak_ordering::equivalent);
     ASSERT_SAME_TYPE(std::weak_ordering, std::__synth_three_way_result<CustomSpaceship, CustomSpaceship>);
+  }
+  // SFINAE tests demonstrating synth-three-way needs three_way_comparable or operator<.
+  {
+    struct NoRelative {
+      constexpr bool operator==(const NoRelative&) const;
+    };
+    static_assert(!can_synth_three_way<NoRelative>);
+  }
+  {
+    struct NoLessThan {
+      constexpr bool operator==(const NoLessThan&) const;
+      constexpr bool operator>(const NoLessThan&) const;
+      constexpr bool operator>=(const NoLessThan&) const;
+      constexpr bool operator<=(const NoLessThan&) const;
+    };
+    static_assert(!can_synth_three_way<NoLessThan>);
   }
   {
     assert(std::__synth_three_way(1, 1U) == std::weak_ordering::equivalent);
@@ -120,6 +156,11 @@ constexpr bool test() {
 int main(int, char**) {
   static_assert(test());
   assert(test());
+
+  {
+    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
+    assert(std::__synth_three_way(nan, 1.0) == std::partial_ordering::unordered);
+  }
 
   return 0;
 }

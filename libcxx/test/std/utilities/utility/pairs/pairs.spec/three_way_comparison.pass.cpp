@@ -50,25 +50,40 @@ constexpr bool test() {
   {
     // Pairs of int (strongly ordered) and double (partially ordered) should compare with partial ordering.
     using P = std::pair<int, double>;
+    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
     ASSERT_SAME_TYPE(decltype(P() <=> P()), std::partial_ordering);
     assert((P(1, 1.0) <=> P(1, 2.0)) == std::partial_ordering::less);
     assert((P(1, 1.0) <=> P(1, 1.0)) == std::partial_ordering::equivalent);
     assert((P(1, -0.0) <=> P(1, 0.0)) == std::partial_ordering::equivalent);
     assert((P(1, 2.0) <=> P(1, 1.0)) == std::partial_ordering::greater);
-    assert((P(1, std::numeric_limits<double>::quiet_NaN())<=> P(2, std::numeric_limits<double>::quiet_NaN()))
-           == std::partial_ordering::less);
-    assert((P(2, std::numeric_limits<double>::quiet_NaN())<=> P(1, std::numeric_limits<double>::quiet_NaN()))
-           == std::partial_ordering::greater);
-    assert((P(1, std::numeric_limits<double>::quiet_NaN())<=> P(1, std::numeric_limits<double>::quiet_NaN()))
-           == std::partial_ordering::unordered);
+    assert((P(1, nan) <=> P(2, nan)) == std::partial_ordering::less);
+    assert((P(2, nan) <=> P(1, nan)) == std::partial_ordering::greater);
+    assert((P(1, nan) <=> P(1, nan)) == std::partial_ordering::unordered);
+  }
+  {
+    using P = std::pair<double, int>;
+    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
+    ASSERT_SAME_TYPE(decltype(P() <=> P()), std::partial_ordering);
+    assert((P(2.0, 1) <=> P(1.0, 2)) == std::partial_ordering::greater);
+    assert((P(1.0, 1) <=> P(1.0, 2)) == std::partial_ordering::less);
+    assert((P(nan, 1) <=> P(nan, 2)) == std::partial_ordering::unordered);
   }
   {
     struct NoRelative {
-      constexpr bool operator==(const NoRelative&) const = default;
+      constexpr bool operator==(const NoRelative&) const;
     };
     static_assert(HasEqual<std::pair<int, NoRelative>>);
     static_assert(!HasLess<std::pair<int, NoRelative>>);
     static_assert(!HasSpaceship<std::pair<int, NoRelative>>);
+  }
+  {
+    struct NoLessThan {
+      constexpr bool operator==(const NoLessThan&) const;
+      constexpr bool operator>(const NoLessThan&) const;
+    };
+    static_assert(HasEqual<std::pair<int, NoLessThan>>);
+    static_assert(!HasLess<std::pair<int, NoLessThan>>);
+    static_assert(!HasSpaceship<std::pair<int, NoLessThan>>);
   }
 
   return true;
@@ -77,6 +92,18 @@ constexpr bool test() {
 int main(int, char**) {
   static_assert(test());
   assert(test());
+
+  // GCC cannot evaluate NaN @ non-NaN constexpr, so test that runtime-only.
+  {
+    using P = std::pair<int, double>;
+    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
+    assert((P(1, 2.0) <=> P(1, nan)) == std::partial_ordering::unordered);
+  }
+  {
+    using P = std::pair<double, int>;
+    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
+    assert((P(1.0, 1) <=> P(nan, 2)) == std::partial_ordering::unordered);
+  }
 
   return 0;
 }

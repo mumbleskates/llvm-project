@@ -21,14 +21,18 @@
 
 #include "test_macros.h"
 
+template<class T> concept HasEqual = requires(T t) { t == t; };
+template<class T> concept HasLess = requires(T t) { t < t; };
+template<class T> concept HasSpaceship = requires(T t) { t <=> t; };
+
 constexpr bool test() {
   {
     // Pairs of types that both have strong ordering should compare with strong ordering.
-    assert((std::make_pair(1, 1) <=> std::make_pair(1, 2)) < 0);
-    assert((std::make_pair(2, 1) <=> std::make_pair(1, 2)) > 0);
-    auto same = std::make_pair(0, 0) <=> std::make_pair(0, 0);
-    assert(same == 0);
-    ASSERT_SAME_TYPE(std::strong_ordering, decltype(same));
+    using P = std::pair<int, int>;
+    ASSERT_SAME_TYPE(decltype(P() <=> P()), std::strong_ordering);
+    assert((P(1, 1) <=> P(1, 2)) == std::strong_ordering::less);
+    assert((P(2, 1) <=> P(1, 2)) == std::strong_ordering::greater);
+    assert((P(0, 0) <=> P(0, 0)) == std::strong_ordering::equal);
   }
   {
     // Pairs of int and a type with no spaceship operator should compare with weak ordering.
@@ -37,22 +41,34 @@ constexpr bool test() {
       constexpr bool operator==(const NoSpaceship&) const = default;
       constexpr bool operator<(const NoSpaceship& other) const { return value < other.value; }
     };
-    assert((std::make_pair(1, NoSpaceship{1}) <=> std::make_pair(1, NoSpaceship{2})) < 0);
-    assert((std::make_pair(2, NoSpaceship{1}) <=> std::make_pair(1, NoSpaceship{2})) > 0);
-    auto same = std::make_pair(0, NoSpaceship{0}) <=> std::make_pair(0, NoSpaceship{0});
-    assert(same == 0);
-    ASSERT_SAME_TYPE(std::weak_ordering, decltype(same));
+    using P = std::pair<int, NoSpaceship>;
+    ASSERT_SAME_TYPE(decltype(P() <=> P()), std::weak_ordering);
+    assert((P(1, {1}) <=> P(1, {2})) == std::weak_ordering::less);
+    assert((P(2, {1}) <=> P(1, {2})) == std::weak_ordering::greater);
+    assert((P(0, {0}) <=> P(0, {0})) == std::weak_ordering::equivalent);
   }
   {
     // Pairs of int (strongly ordered) and double (partially ordered) should compare with partial ordering.
-    assert((std::make_pair(1, 1.0) <=> std::make_pair(1, 2.0)) < 0);
-    assert((std::make_pair(2, 1.0) <=> std::make_pair(1, 1.0)) > 0);
-    assert((std::make_pair(std::numeric_limits<double>::quiet_NaN(), 1)
-                   <=> std::make_pair(std::numeric_limits<double>::quiet_NaN(), 2))
-                  == std::partial_ordering::unordered);
-    auto same = std::make_pair(0, 0.0) <=> std::make_pair(0, 0.0);
-    assert(same == 0);
-    ASSERT_SAME_TYPE(std::partial_ordering, decltype(same));
+    using P = std::pair<int, double>;
+    ASSERT_SAME_TYPE(decltype(P() <=> P()), std::partial_ordering);
+    assert((P(1, 1.0) <=> P(1, 2.0)) == std::partial_ordering::less);
+    assert((P(1, 1.0) <=> P(1, 1.0)) == std::partial_ordering::equivalent);
+    assert((P(1, -0.0) <=> P(1, 0.0)) == std::partial_ordering::equivalent);
+    assert((P(1, 2.0) <=> P(1, 1.0)) == std::partial_ordering::greater);
+    assert((P(1, std::numeric_limits<double>::quiet_NaN())<=> P(2, std::numeric_limits<double>::quiet_NaN()))
+           == std::partial_ordering::less);
+    assert((P(2, std::numeric_limits<double>::quiet_NaN())<=> P(1, std::numeric_limits<double>::quiet_NaN()))
+           == std::partial_ordering::greater);
+    assert((P(1, std::numeric_limits<double>::quiet_NaN())<=> P(1, std::numeric_limits<double>::quiet_NaN()))
+           == std::partial_ordering::unordered);
+  }
+  {
+    struct NoRelative {
+      constexpr bool operator==(const NoRelative&) const = default;
+    };
+    static_assert(HasEqual<std::pair<int, NoRelative>>);
+    static_assert(!HasLess<std::pair<int, NoRelative>>);
+    static_assert(!HasSpaceship<std::pair<int, NoRelative>>);
   }
 
   return true;

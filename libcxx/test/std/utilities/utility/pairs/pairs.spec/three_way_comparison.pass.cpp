@@ -17,6 +17,7 @@
 #include <cassert>
 #include <compare>
 #include <limits>
+#include <type_traits> // std::is_constant_evaluated
 #include <utility>
 
 #include "test_macros.h"
@@ -86,24 +87,29 @@ constexpr bool test() {
     static_assert(!HasSpaceship<std::pair<int, NoLessThan>>);
   }
 
+#ifdef TEST_COMPILER_GCC
+  // GCC cannot evaluate NaN @ non-NaN constexpr, so test that runtime-only.
+  if (!std::is_constant_evaluated())
+#endif
+  {
+    {
+      using P = std::pair<int, double>;
+      constexpr double nan = std::numeric_limits<double>::quiet_NaN();
+      assert((P(1, 2.0) <=> P(1, nan)) == std::partial_ordering::unordered);
+    }
+    {
+      using P = std::pair<double, int>;
+      constexpr double nan = std::numeric_limits<double>::quiet_NaN();
+      assert((P(1.0, 1) <=> P(nan, 2)) == std::partial_ordering::unordered);
+    }
+  }
+
   return true;
 }
 
 int main(int, char**) {
   static_assert(test());
   assert(test());
-
-  // GCC cannot evaluate NaN @ non-NaN constexpr, so test that runtime-only.
-  {
-    using P = std::pair<int, double>;
-    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
-    assert((P(1, 2.0) <=> P(1, nan)) == std::partial_ordering::unordered);
-  }
-  {
-    using P = std::pair<double, int>;
-    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
-    assert((P(1.0, 1) <=> P(nan, 2)) == std::partial_ordering::unordered);
-  }
 
   return 0;
 }

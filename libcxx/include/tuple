@@ -1325,7 +1325,7 @@ _LIBCPP_HIDE_FROM_ABI constexpr
 common_comparison_category_t<__synth_three_way_result<_Tp, _Up>...>
 operator<=>(const tuple<_Tp...>& __x, const tuple<_Up...>& __y)
 {
-    return __tuple_compare_three_way(__x, __y, index_sequence_for<_Tp...>{});
+    return _VSTD::__tuple_compare_three_way(__x, __y, index_sequence_for<_Tp...>{});
 }
 
 #else // _LIBCPP_STD_VER > 17 && !defined(_LIBCPP_HAS_NO_SPACESHIP_OPERATOR) && !defined(_LIBCPP_HAS_NO_CONCEPTS)

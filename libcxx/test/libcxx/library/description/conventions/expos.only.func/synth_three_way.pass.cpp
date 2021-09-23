@@ -154,8 +154,8 @@ constexpr bool test() {
 }
 
 int main(int, char**) {
+  test();
   static_assert(test());
-  assert(test());
 
   {
     constexpr double nan = std::numeric_limits<double>::quiet_NaN();

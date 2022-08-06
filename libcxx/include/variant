@@ -1637,7 +1637,7 @@ constexpr bool operator==(const variant<_Types...>& __lhs,
   return __variant::__visit_value_at(__lhs.index(), __convert_to_bool<equal_to<>>{}, __lhs, __rhs);
 }
 
-#if _LIBCPP_STD_VERSION > 17 && !defined(_LIBCPP_HAS_NO_SPACESHIP_OPERATOR) && !defined(_LIBCPP_HAS_NO_CONCEPTS)
+#if _LIBCPP_STD_VERSION > 17
 
 template <class... _Types> requires (three_way_comparable<_Types> && ...)
 inline _LIBCPP_INLINE_VISIBILITY constexpr
@@ -1653,7 +1653,7 @@ operator<=>(const variant<_Types...>& __lhs,
   return __variant::__visit_value_at(__lhs.index(), __three_way, __lhs, __rhs);
 }
 
-#endif // _LIBCPP_STD_VERSION > 17 && !defined(_LIBCPP_HAS_NO_SPACESHIP_OPERATOR) && !defined(_LIBCPP_HAS_NO_CONCEPTS)
+#endif // _LIBCPP_STD_VERSION > 17
 
 template <class... _Types>
 inline _LIBCPP_INLINE_VISIBILITY

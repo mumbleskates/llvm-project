@@ -206,7 +206,6 @@ namespace std {
 #include <__assert> // all public C++ headers provide the assertion handler
 #include <__availability>
 #include <__compare/common_comparison_category.h>
-#include <__compare/compare_three_way.h>
 #include <__compare/compare_three_way_result.h>
 #include <__compare/three_way_comparable.h>
 #include <__config>
@@ -1650,7 +1649,11 @@ operator<=>(const variant<_Types...>& __lhs,
   if (__lhs.valueless_by_exception()) return strong_ordering::less;
   if (__rhs.valueless_by_exception()) return strong_ordering::greater;
   if (auto __c = __lhs.index() <=> __rhs.index(); __c != 0) return __c;
-  return __variant::__visit_value_at(__lhs.index(), compare_three_way{}, __lhs, __rhs);
+  auto __three_way = []<class _Type>(const _Type& __v, const _Type& __w) -> common_comparison_category_t<
+                                                                             compare_three_way_result_t<_Types>...> {
+    return __v <=> __w;
+  };
+  return __variant::__visit_value_at(__lhs.index(), __three_way, __lhs, __rhs);
 }
 
 #endif // _LIBCPP_STD_VER > 17

@@ -16,6 +16,7 @@
 // constexpr bool operator>=(monostate, monostate) noexcept { return true; }
 // constexpr bool operator==(monostate, monostate) noexcept { return true; }
 // constexpr bool operator!=(monostate, monostate) noexcept { return false; }
+// constexpr strong_ordering operator<=>(monostate, monostate) noexcept { return strong_ordering::equal; } // since C++20
 
 #include "test_macros.h"
 #include <cassert>

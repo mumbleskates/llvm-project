@@ -10,6 +10,7 @@
 #ifndef _LIBCPP___VARIANT_MONOSTATE_H
 #define _LIBCPP___VARIANT_MONOSTATE_H
 
+#include <__compare/ordering.h>
 #include <__config>
 #include <__functional/hash.h>
 #include <cstddef>

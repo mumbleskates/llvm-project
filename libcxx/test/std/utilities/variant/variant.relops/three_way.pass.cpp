@@ -51,12 +51,6 @@ template <class Variant> void makeEmpty(Variant &v) {
 }
 #endif // TEST_HAS_NO_EXCEPTIONS
 
-template <class Var, class Order>
-constexpr bool test_three_way_val(const Var &l, const Var &r, Order order) {
-  static_assert(std::is_same_v<decltype(l <=> r), Order>);
-  return (l <=> r) == order;
-}
-
 template <class T1, class T2>
 void test_with_types() {
   using V = std::variant<T1, T2>;

@@ -23,10 +23,6 @@
 #include <type_traits>
 #include <variant>
 
-#if TEST_STD_VER > 17
-#include <compare>
-#endif // TEST_STD_VER > 17
-
 int main(int, char**) {
   using M = std::monostate;
   constexpr M m1{};

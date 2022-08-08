@@ -23,7 +23,7 @@
 #include <type_traits>
 #include <variant>
 
-int main(int, char**) {
+constexpr bool test() {
   using M = std::monostate;
   constexpr M m1{};
   constexpr M m2{};
@@ -58,6 +58,13 @@ int main(int, char**) {
     ASSERT_NOEXCEPT(m1 <=> m2);
   }
 #endif // TEST_STD_VER > 17
+
+  return true;
+}
+
+int main(int, char**) {
+  test();
+  static_assert(test());
 
   return 0;
 }

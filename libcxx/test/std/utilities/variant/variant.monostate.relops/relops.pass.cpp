@@ -18,45 +18,21 @@
 // constexpr bool operator!=(monostate, monostate) noexcept { return false; }
 // constexpr strong_ordering operator<=>(monostate, monostate) noexcept { return strong_ordering::equal; } // since C++20
 
-#include "test_macros.h"
-#include <cassert>
-#include <type_traits>
 #include <variant>
+
+#include "test_comparisons.h"
+#include "test_macros.h"
 
 constexpr bool test() {
   using M = std::monostate;
   constexpr M m1{};
   constexpr M m2{};
-  {
-    static_assert((m1 < m2) == false, "");
-    ASSERT_NOEXCEPT(m1 < m2);
-  }
-  {
-    static_assert((m1 > m2) == false, "");
-    ASSERT_NOEXCEPT(m1 > m2);
-  }
-  {
-    static_assert((m1 <= m2) == true, "");
-    ASSERT_NOEXCEPT(m1 <= m2);
-  }
-  {
-    static_assert((m1 >= m2) == true, "");
-    ASSERT_NOEXCEPT(m1 >= m2);
-  }
-  {
-    static_assert((m1 == m2) == true, "");
-    ASSERT_NOEXCEPT(m1 == m2);
-  }
-  {
-    static_assert((m1 != m2) == false, "");
-    ASSERT_NOEXCEPT(m1 != m2);
-  }
+  testComparisons(m1, m2, /*isEqual*/ true, /*isLess*/ false);
+  AssertComparisonsAreNoexcept<M>();
+
 #if TEST_STD_VER > 17
-  {
-    static_assert((m1 <=> m2) == std::strong_ordering::equal);
-    ASSERT_SAME_TYPE(decltype(m1 <=> m2), std::strong_ordering);
-    ASSERT_NOEXCEPT(m1 <=> m2);
-  }
+  testOrder(m1, m2, std::strong_ordering::equal);
+  AssertOrderAreNoexcept<M>();
 #endif // TEST_STD_VER > 17
 
   return true;

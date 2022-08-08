@@ -1645,12 +1645,12 @@ common_comparison_category_t<compare_three_way_result_t<_Types>...>
 operator<=>(const variant<_Types...>& __lhs,
             const variant<_Types...>& __rhs) {
   using __variant_detail::__visitation::__variant;
+  using __result_t = common_comparison_category_t<compare_three_way_result_t<_Types>...>;
   if (__lhs.valueless_by_exception() && __rhs.valueless_by_exception()) return strong_ordering::equal;
   if (__lhs.valueless_by_exception()) return strong_ordering::less;
   if (__rhs.valueless_by_exception()) return strong_ordering::greater;
   if (auto __c = __lhs.index() <=> __rhs.index(); __c != 0) return __c;
-  auto __three_way = []<class _Type>(const _Type& __v, const _Type& __w) -> common_comparison_category_t<
-                                                                             compare_three_way_result_t<_Types>...> {
+  auto __three_way = []<class _Type>(const _Type& __v, const _Type& __w) -> __result_t {
     return __v <=> __w;
   };
   return __variant::__visit_value_at(__lhs.index(), __three_way, __lhs, __rhs);

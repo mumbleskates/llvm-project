@@ -23,6 +23,7 @@
 #include <variant>
 
 #include "test_macros.h"
+#include "test_comparisons.h"
 
 #ifndef TEST_HAS_NO_EXCEPTIONS
 struct MakeEmptyT {
@@ -34,9 +35,9 @@ inline bool operator==(const MakeEmptyT &, const MakeEmptyT &) {
   assert(false);
   return false;
 }
-inline std::partial_ordering operator<=>(const MakeEmptyT&, const MakeEmptyT&) {
+inline std::weak_ordering operator<=>(const MakeEmptyT&, const MakeEmptyT&) {
   assert(false);
-  return std::partial_ordering::unordered;
+  return std::weak_ordering::equivalent;
 }
 
 template <class Variant> void makeEmpty(Variant &v) {
@@ -57,33 +58,33 @@ constexpr bool test_three_way_val(const Var &l, const Var &r, Order order) {
 }
 
 template <class T1, class T2>
-void test_relational_basic() {
+void test_with_types() {
   using V = std::variant<T1, T2>;
   using Order = std::compare_three_way_result_t<V>;
   { // same index, same value
     constexpr V v1(std::in_place_index<0>, T1{1});
     constexpr V v2(std::in_place_index<0>, T1{1});
-    static_assert(test_three_way_val(v1, v2, Order(std::strong_ordering::equal)));
+    static_assert(testOrder(v1, v2, Order(std::strong_ordering::equivalent)));
   }
   { // same index, value < other_value
     constexpr V v1(std::in_place_index<0>, T1{0});
     constexpr V v2(std::in_place_index<0>, T1{1});
-    static_assert(test_three_way_val(v1, v2, Order(std::strong_ordering::less)));
+    static_assert(testOrder(v1, v2, Order(std::strong_ordering::less)));
   }
   { // same index, value > other_value
     constexpr V v1(std::in_place_index<0>, T1{1});
     constexpr V v2(std::in_place_index<0>, T1{0});
-    static_assert(test_three_way_val(v1, v2, Order(std::strong_ordering::greater)));
+    static_assert(testOrder(v1, v2, Order(std::strong_ordering::greater)));
   }
   { // LHS.index() < RHS.index()
     constexpr V v1(std::in_place_index<0>, T1{0});
     constexpr V v2(std::in_place_index<1>, T2{0});
-    static_assert(test_three_way_val(v1, v2, Order(std::strong_ordering::less)));
+    static_assert(testOrder(v1, v2, Order(std::strong_ordering::less)));
   }
   { // LHS.index() > RHS.index()
     constexpr V v1(std::in_place_index<1>, T2{0});
     constexpr V v2(std::in_place_index<0>, T1{0});
-    static_assert(test_three_way_val(v1, v2, Order(std::strong_ordering::greater)));
+    static_assert(testOrder(v1, v2, Order(std::strong_ordering::greater)));
   }
 }
 
@@ -91,12 +92,12 @@ void test_three_way() {
   {
     using V = std::variant<int, double>;
     ASSERT_SAME_TYPE(std::partial_ordering, std::compare_three_way_result_t<V>);
-    test_relational_basic<int, double>();
+    test_with_types<int, double>();
   }
   {
     using V = std::variant<int, long>;
     ASSERT_SAME_TYPE(std::strong_ordering, std::compare_three_way_result_t<V>);
-    test_relational_basic<int, long>();
+    test_with_types<int, long>();
   }
 
 #ifndef TEST_HAS_NO_EXCEPTIONS
@@ -105,14 +106,14 @@ void test_three_way() {
     V v1;
     V v2;
     makeEmpty(v2);
-    assert((v1 <=> v2) > 0);
+    assert(testOrder(v1, v2, std::weak_ordering::greater));
   }
   {
     using V = std::variant<int, MakeEmptyT>;
     V v1;
     makeEmpty(v1);
     V v2;
-    assert((v1 <=> v2) < 0);
+    assert(testOrder(v1, v2, std::weak_ordering::less));
   }
   {
     using V = std::variant<int, MakeEmptyT>;
@@ -120,7 +121,7 @@ void test_three_way() {
     makeEmpty(v1);
     V v2;
     makeEmpty(v2);
-    assert((v1 <=> v2) == 0);
+    assert(testOrder(v1, v2, std::weak_ordering::equivalent));
   }
 #endif // TEST_HAS_NO_EXCEPTIONS
 }

@@ -22,6 +22,10 @@
 #include <type_traits>
 #include <variant>
 
+#if TEST_STD_VER > 17
+#include <compare>
+#endif // TEST_STD_VER > 17
+
 int main(int, char**) {
   using M = std::monostate;
   constexpr M m1{};
@@ -50,6 +54,13 @@ int main(int, char**) {
     static_assert((m1 != m2) == false, "");
     ASSERT_NOEXCEPT(m1 != m2);
   }
+#if TEST_STD_VER > 17
+  {
+    static_assert((m1 <=> m2) == std::strong_ordering::equal);
+    ASSERT_SAME_TYPE(decltype(m1 <=> m2), std::strong_ordering);
+    ASSERT_NOEXCEPT(m1 <=> m2);
+  }
+#endif // TEST_STD_VER > 17
 
   return 0;
 }

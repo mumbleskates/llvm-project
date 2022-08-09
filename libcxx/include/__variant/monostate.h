@@ -25,29 +25,29 @@ _LIBCPP_BEGIN_NAMESPACE_STD
 
 struct _LIBCPP_TEMPLATE_VIS monostate {};
 
-inline _LIBCPP_INLINE_VISIBILITY
+_LIBCPP_HIDE_FROM_ABI
 constexpr bool operator==(monostate, monostate) noexcept { return true; }
 
 #if _LIBCPP_STD_VER > 17
 
-inline _LIBCPP_INLINE_VISIBILITY
+_LIBCPP_HIDE_FROM_ABI
 constexpr strong_ordering operator<=>(monostate, monostate) noexcept { return strong_ordering::equal; }
 
 #else // _LIBCPP_STD_VER > 17
 
-inline _LIBCPP_INLINE_VISIBILITY
+_LIBCPP_HIDE_FROM_ABI
 constexpr bool operator!=(monostate, monostate) noexcept { return false; }
 
-inline _LIBCPP_INLINE_VISIBILITY
+_LIBCPP_HIDE_FROM_ABI
 constexpr bool operator<(monostate, monostate) noexcept { return false; }
 
-inline _LIBCPP_INLINE_VISIBILITY
+_LIBCPP_HIDE_FROM_ABI
 constexpr bool operator>(monostate, monostate) noexcept { return false; }
 
-inline _LIBCPP_INLINE_VISIBILITY
+_LIBCPP_HIDE_FROM_ABI
 constexpr bool operator<=(monostate, monostate) noexcept { return true; }
 
-inline _LIBCPP_INLINE_VISIBILITY
+_LIBCPP_HIDE_FROM_ABI
 constexpr bool operator>=(monostate, monostate) noexcept { return true; }
 
 #endif // _LIBCPP_STD_VER > 17
@@ -57,7 +57,7 @@ struct _LIBCPP_TEMPLATE_VIS hash<monostate> {
   using argument_type = monostate;
   using result_type = size_t;
 
-  inline _LIBCPP_INLINE_VISIBILITY
+  inline _LIBCPP_HIDE_FROM_ABI
   result_type operator()(const argument_type&) const _NOEXCEPT {
     return 66740831; // return a fundamentally attractive random value.
   }

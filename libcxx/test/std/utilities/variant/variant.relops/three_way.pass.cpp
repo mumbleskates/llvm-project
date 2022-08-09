@@ -18,7 +18,6 @@
 // UNSUPPORTED: c++03, c++11, c++14, c++17
 
 #include <cassert>
-#include <type_traits>
 #include <utility>
 #include <variant>
 
@@ -26,6 +25,7 @@
 #include "test_comparisons.h"
 
 #ifndef TEST_HAS_NO_EXCEPTIONS
+// MakeEmptyT throws in operator=(&&), so we can move to it to create valueless-by-exception variants.
 struct MakeEmptyT {
   MakeEmptyT() = default;
   MakeEmptyT(MakeEmptyT &&) { throw 42; }
@@ -49,52 +49,8 @@ template <class Variant> void makeEmpty(Variant &v) {
     assert(v.valueless_by_exception());
   }
 }
-#endif // TEST_HAS_NO_EXCEPTIONS
 
-template <class T1, class T2>
-void test_with_types() {
-  using V = std::variant<T1, T2>;
-  using Order = std::compare_three_way_result_t<V>;
-  { // same index, same value
-    constexpr V v1(std::in_place_index<0>, T1{1});
-    constexpr V v2(std::in_place_index<0>, T1{1});
-    static_assert(testOrder(v1, v2, Order(std::strong_ordering::equivalent)));
-  }
-  { // same index, value < other_value
-    constexpr V v1(std::in_place_index<0>, T1{0});
-    constexpr V v2(std::in_place_index<0>, T1{1});
-    static_assert(testOrder(v1, v2, Order(std::strong_ordering::less)));
-  }
-  { // same index, value > other_value
-    constexpr V v1(std::in_place_index<0>, T1{1});
-    constexpr V v2(std::in_place_index<0>, T1{0});
-    static_assert(testOrder(v1, v2, Order(std::strong_ordering::greater)));
-  }
-  { // LHS.index() < RHS.index()
-    constexpr V v1(std::in_place_index<0>, T1{0});
-    constexpr V v2(std::in_place_index<1>, T2{0});
-    static_assert(testOrder(v1, v2, Order(std::strong_ordering::less)));
-  }
-  { // LHS.index() > RHS.index()
-    constexpr V v1(std::in_place_index<1>, T2{0});
-    constexpr V v2(std::in_place_index<0>, T1{0});
-    static_assert(testOrder(v1, v2, Order(std::strong_ordering::greater)));
-  }
-}
-
-void test_three_way() {
-  {
-    using V = std::variant<int, double>;
-    ASSERT_SAME_TYPE(std::partial_ordering, std::compare_three_way_result_t<V>);
-    test_with_types<int, double>();
-  }
-  {
-    using V = std::variant<int, long>;
-    ASSERT_SAME_TYPE(std::strong_ordering, std::compare_three_way_result_t<V>);
-    test_with_types<int, long>();
-  }
-
-#ifndef TEST_HAS_NO_EXCEPTIONS
+void test_empty() {
   {
     using V = std::variant<int, MakeEmptyT>;
     V v1;
@@ -111,17 +67,61 @@ void test_three_way() {
   }
   {
     using V = std::variant<int, MakeEmptyT>;
-    V v1;
-    makeEmpty(v1);
     V v2;
     makeEmpty(v2);
+    V v1;
+    makeEmpty(v1);
     assert(testOrder(v1, v2, std::weak_ordering::equivalent));
   }
+}
 #endif // TEST_HAS_NO_EXCEPTIONS
+
+template <class T1, class T2, class Order>
+constexpr bool test_with_types() {
+  using V = std::variant<T1, T2>;
+  { // same index, same value
+    constexpr V v1(std::in_place_index<0>, T1{1});
+    constexpr V v2(std::in_place_index<0>, T1{1});
+    assert(testOrder(v1, v2, Order(std::strong_ordering::equivalent)));
+  }
+  { // same index, value < other_value
+    constexpr V v1(std::in_place_index<0>, T1{0});
+    constexpr V v2(std::in_place_index<0>, T1{1});
+    assert(testOrder(v1, v2, Order(std::strong_ordering::less)));
+  }
+  { // same index, value > other_value
+    constexpr V v1(std::in_place_index<0>, T1{1});
+    constexpr V v2(std::in_place_index<0>, T1{0});
+    assert(testOrder(v1, v2, Order(std::strong_ordering::greater)));
+  }
+  { // LHS.index() < RHS.index()
+    constexpr V v1(std::in_place_index<0>, T1{0});
+    constexpr V v2(std::in_place_index<1>, T2{0});
+    assert(testOrder(v1, v2, Order(std::strong_ordering::less)));
+  }
+  { // LHS.index() > RHS.index()
+    constexpr V v1(std::in_place_index<1>, T2{0});
+    constexpr V v2(std::in_place_index<0>, T1{0});
+    assert(testOrder(v1, v2, Order(std::strong_ordering::greater)));
+  }
+
+  return true;
+}
+
+constexpr bool test_three_way() {
+  assert((test_with_types<int, double, std::partial_ordering>()));
+  assert((test_with_types<int, long, std::strong_ordering>()));
+
+  return true;
 }
 
 int main(int, char**) {
   test_three_way();
+  static_assert(test_three_way());
+
+#ifndef TEST_HAS_NO_EXCEPTIONS
+  test_empty();
+#endif // TEST_HAS_NO_EXCEPTIONS
 
   return 0;
 }

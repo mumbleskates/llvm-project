@@ -18,6 +18,8 @@
 //   operator<=>(const variant<Types...>& t, const variant<Types...>& u);
 
 #include <cassert>
+#include <limits>
+#include <type_traits>
 #include <utility>
 #include <variant>
 
@@ -112,6 +114,26 @@ constexpr bool test_with_types() {
 constexpr bool test_three_way() {
   assert((test_with_types<int, double, std::partial_ordering>()));
   assert((test_with_types<int, long, std::strong_ordering>()));
+
+  {
+    using V = std::variant<int, double>;
+    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
+    {
+      constexpr V v1(std::in_place_type<int>, 1);
+      constexpr V v2(std::in_place_type<double>, nan);
+      assert(testOrder(v1, v2, std::partial_ordering::less));
+    }
+    {
+      constexpr V v1(std::in_place_type<double>, nan);
+      constexpr V v2(std::in_place_type<int>, 2);
+      assert(testOrder(v1, v2, std::partial_ordering::greater));
+    }
+    {
+      constexpr V v1(std::in_place_type<double>, nan);
+      constexpr V v2(std::in_place_type<double>, nan);
+      assert(testOrder(v1, v2, std::partial_ordering::unordered));
+    }
+  }
 
   return true;
 }

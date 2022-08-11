@@ -23,9 +23,11 @@
 #ifndef TEST_COMPARISONS_H
 #define TEST_COMPARISONS_H
 
-#include <type_traits>
 #include <cassert>
+#include <compare>
 #include <concepts>
+#include <type_traits>
+
 #include "test_macros.h"
 
 //  Test all six comparison operations for sanity
@@ -79,6 +81,24 @@ TEST_CONSTEXPR_CXX14 bool testComparisons(const T& t1, const U& t2, bool isEqual
         if ( (t2 >= t1)) return false;
         }
 
+    return true;
+}
+
+template <class T, class U = T>
+TEST_CONSTEXPR_CXX14 bool testComparisonsUnordered(const T& t1, const U& t2)
+{
+    if ( (t1 == t2)) return false;
+    if ( (t2 == t1)) return false;
+    if (!(t1 != t2)) return false;
+    if (!(t2 != t1)) return false;
+    if ( (t1  < t2)) return false;
+    if ( (t2  < t1)) return false;
+    if ( (t1 <= t2)) return false;
+    if ( (t2 <= t1)) return false;
+    if ( (t1  > t2)) return false;
+    if ( (t2  > t1)) return false;
+    if ( (t1 >= t2)) return false;
+    if ( (t2 >= t1)) return false;
     return true;
 }
 
@@ -138,10 +158,10 @@ constexpr void AssertOrderReturn() {
 
 template <class Order, class T, class U = T>
 constexpr bool testOrder(const T& t1, const U& t2, Order order) {
-    bool equal = order == Order::equivalent;
-    bool less = order == Order::less;
-
-    return (t1 <=> t2 == order) && testComparisons(t1, t2, equal, less);
+    return (t1 <=> t2 == order) &&
+           (order == std::partial_ordering::unordered
+                ? testComparisonsUnordered(t1, t2)
+                : testComparisons(t1, t2, order == Order::equivalent, order == Order::less));
 }
 
 template <class T, class Param>

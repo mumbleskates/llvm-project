@@ -30,13 +30,6 @@
 
 #include "test_macros.h"
 
-// Test the six basic comparison operators for ordered values.
-template <class T, class U = T>
-_LIBCPP_NODISCARD TEST_CONSTEXPR_CXX14 bool testComparisons(const T& t1, const U& t2, bool isEqual, bool isLess) {
-    bool isGreater = !isEqual && !isLess;
-    return testComparisonsComplete(t1, t2, isEqual, isLess, isGreater);
-}
-
 // Test the consistency of the six basic comparison operators for values that are ordered or unordered.
 template <class T, class U = T>
 _LIBCPP_NODISCARD TEST_CONSTEXPR_CXX14 bool testComparisonsComplete(const T& t1, const U& t2, bool isEqual, bool isLess, bool isGreater) {
@@ -97,6 +90,13 @@ _LIBCPP_NODISCARD TEST_CONSTEXPR_CXX14 bool testComparisonsComplete(const T& t1,
     }
 
     return true;
+}
+
+// Test the six basic comparison operators for ordered values.
+template <class T, class U = T>
+_LIBCPP_NODISCARD TEST_CONSTEXPR_CXX14 bool testComparisons(const T& t1, const U& t2, bool isEqual, bool isLess) {
+    bool isGreater = !isEqual && !isLess;
+    return testComparisonsComplete(t1, t2, isEqual, isLess, isGreater);
 }
 
 //  Easy call when you can init from something already comparable.

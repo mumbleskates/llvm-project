@@ -82,30 +82,31 @@ void test_empty() {
 template <class T1, class T2, class Order>
 constexpr bool test_with_types() {
   using V = std::variant<T1, T2>;
+  AssertOrderReturn<Order, V>();
   { // same index, same value
     constexpr V v1(std::in_place_index<0>, T1{1});
     constexpr V v2(std::in_place_index<0>, T1{1});
-    assert(testOrder(v1, v2, Order(std::strong_ordering::equivalent)));
+    assert(testOrder(v1, v2, Order::equivalent));
   }
   { // same index, value < other_value
     constexpr V v1(std::in_place_index<0>, T1{0});
     constexpr V v2(std::in_place_index<0>, T1{1});
-    assert(testOrder(v1, v2, Order(std::strong_ordering::less)));
+    assert(testOrder(v1, v2, Order::less));
   }
   { // same index, value > other_value
     constexpr V v1(std::in_place_index<0>, T1{1});
     constexpr V v2(std::in_place_index<0>, T1{0});
-    assert(testOrder(v1, v2, Order(std::strong_ordering::greater)));
+    assert(testOrder(v1, v2, Order::greater));
   }
   { // LHS.index() < RHS.index()
     constexpr V v1(std::in_place_index<0>, T1{0});
     constexpr V v2(std::in_place_index<1>, T2{0});
-    assert(testOrder(v1, v2, Order(std::strong_ordering::less)));
+    assert(testOrder(v1, v2, Order::less));
   }
   { // LHS.index() > RHS.index()
     constexpr V v1(std::in_place_index<1>, T2{0});
     constexpr V v2(std::in_place_index<0>, T1{0});
-    assert(testOrder(v1, v2, Order(std::strong_ordering::greater)));
+    assert(testOrder(v1, v2, Order::greater));
   }
 
   return true;

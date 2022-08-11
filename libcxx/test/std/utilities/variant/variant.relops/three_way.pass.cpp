@@ -6,6 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+// UNSUPPORTED: c++03, c++11, c++14, c++17
+
 // <variant>
 
 // template <class... Types> class variant;
@@ -14,8 +16,6 @@
 //   constexpr std::common_comparison_category_t<
 //     std::compare_three_way_result_t<Types>...>
 //   operator<=>(const variant<Types...>& t, const variant<Types...>& u);
-
-// UNSUPPORTED: c++03, c++11, c++14, c++17
 
 #include <cassert>
 #include <utility>
@@ -67,10 +67,10 @@ void test_empty() {
   }
   {
     using V = std::variant<int, MakeEmptyT>;
-    V v2;
-    makeEmpty(v2);
     V v1;
     makeEmpty(v1);
+    V v2;
+    makeEmpty(v2);
     assert(testOrder(v1, v2, std::weak_ordering::equivalent));
   }
 }

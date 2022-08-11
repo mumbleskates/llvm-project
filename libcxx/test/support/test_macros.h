@@ -235,12 +235,8 @@
 #define LIBCPP_ONLY(...) static_assert(true, "")
 #endif
 
-#if TEST_STD_VER >= 17
+#if __has_cpp_attribute(nodiscard)
 #  define TEST_NODISCARD [[nodiscard]]
-#elif defined(TEST_COMPILER_CLANG) || defined(TEST_COMPILER_GCC)
-#  define TEST_NODISCARD __attribute__((warn_unused_result))
-#elif defined(TEST_COMPILER_MSVC) && _MSC_VER >= 1700
-#  define TEST_NODISCARD _Check_return_
 #else
 #  define TEST_NODISCARD
 #endif

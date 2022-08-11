@@ -117,7 +117,7 @@ constexpr bool test_three_way() {
   assert((test_with_types<int, long, std::strong_ordering>()));
 
   {
-    using V = std::variant<int, double>;
+    using V              = std::variant<int, double>;
     constexpr double nan = std::numeric_limits<double>::quiet_NaN();
     {
       constexpr V v1(std::in_place_type<int>, 1);

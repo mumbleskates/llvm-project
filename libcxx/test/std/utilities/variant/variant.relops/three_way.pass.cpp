@@ -28,10 +28,10 @@
 // MakeEmptyT throws in operator=(&&), so we can move to it to create valueless-by-exception variants.
 struct MakeEmptyT {
   MakeEmptyT() = default;
-  MakeEmptyT(MakeEmptyT &&) { throw 42; }
-  MakeEmptyT &operator=(MakeEmptyT &&) { throw 42; }
+  MakeEmptyT(MakeEmptyT&&) { throw 42; }
+  MakeEmptyT& operator=(MakeEmptyT&&) { throw 42; }
 };
-inline bool operator==(const MakeEmptyT &, const MakeEmptyT &) {
+inline bool operator==(const MakeEmptyT&, const MakeEmptyT&) {
   assert(false);
   return false;
 }
@@ -40,7 +40,8 @@ inline std::weak_ordering operator<=>(const MakeEmptyT&, const MakeEmptyT&) {
   return std::weak_ordering::equivalent;
 }
 
-template <class Variant> void makeEmpty(Variant &v) {
+template <class Variant>
+void makeEmpty(Variant& v) {
   Variant v2(std::in_place_type<MakeEmptyT>);
   try {
     v = std::move(v2);

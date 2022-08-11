@@ -739,21 +739,21 @@ union _LIBCPP_TEMPLATE_VIS __union<_DestructibleTrait, _Index> {};
 
 #define _LIBCPP_VARIANT_UNION(destructible_trait, destructor)                  \
   template <size_t _Index, class _Tp, class... _Types>                         \
-  union _LIBCPP_TEMPLATE_VIS __union<destructible_trait,                      \
+  union _LIBCPP_TEMPLATE_VIS __union<destructible_trait,                       \
                                       _Index,                                  \
                                       _Tp,                                     \
                                       _Types...> {                             \
   public:                                                                      \
-    _LIBCPP_HIDE_FROM_ABI                                           \
+    _LIBCPP_HIDE_FROM_ABI                                                      \
     explicit constexpr __union(__valueless_t) noexcept : __dummy{} {}          \
                                                                                \
     template <class... _Args>                                                  \
-    _LIBCPP_HIDE_FROM_ABI                                           \
+    _LIBCPP_HIDE_FROM_ABI                                                      \
     explicit constexpr __union(in_place_index_t<0>, _Args&&... __args)         \
         : __head(in_place, _VSTD::forward<_Args>(__args)...) {}                \
                                                                                \
     template <size_t _Ip, class... _Args>                                      \
-    _LIBCPP_HIDE_FROM_ABI                                           \
+    _LIBCPP_HIDE_FROM_ABI                                                      \
     explicit constexpr __union(in_place_index_t<_Ip>, _Args&&... __args)       \
         : __tail(in_place_index<_Ip - 1>, _VSTD::forward<_Args>(__args)...) {} \
                                                                                \
@@ -962,7 +962,7 @@ class _LIBCPP_TEMPLATE_VIS __copy_constructor;
 #define _LIBCPP_VARIANT_COPY_CONSTRUCTOR(copy_constructible_trait,             \
                                          copy_constructor)                     \
   template <class... _Types>                                                   \
-  class _LIBCPP_TEMPLATE_VIS __copy_constructor<__traits<_Types...>,          \
+  class _LIBCPP_TEMPLATE_VIS __copy_constructor<__traits<_Types...>,           \
                                                  copy_constructible_trait>     \
       : public __move_constructor<__traits<_Types...>> {                       \
     using __base_type = __move_constructor<__traits<_Types...>>;               \
@@ -1061,7 +1061,7 @@ class _LIBCPP_TEMPLATE_VIS __move_assignment;
 #define _LIBCPP_VARIANT_MOVE_ASSIGNMENT(move_assignable_trait,                 \
                                         move_assignment)                       \
   template <class... _Types>                                                   \
-  class _LIBCPP_TEMPLATE_VIS __move_assignment<__traits<_Types...>,           \
+  class _LIBCPP_TEMPLATE_VIS __move_assignment<__traits<_Types...>,            \
                                                 move_assignable_trait>         \
       : public __assignment<__traits<_Types...>> {                             \
     using __base_type = __assignment<__traits<_Types...>>;                     \
@@ -1102,7 +1102,7 @@ class _LIBCPP_TEMPLATE_VIS __copy_assignment;
 #define _LIBCPP_VARIANT_COPY_ASSIGNMENT(copy_assignable_trait,                 \
                                         copy_assignment)                       \
   template <class... _Types>                                                   \
-  class _LIBCPP_TEMPLATE_VIS __copy_assignment<__traits<_Types...>,           \
+  class _LIBCPP_TEMPLATE_VIS __copy_assignment<__traits<_Types...>,            \
                                                 copy_assignable_trait>         \
       : public __move_assignment<__traits<_Types...>> {                        \
     using __base_type = __move_assignment<__traits<_Types...>>;                \

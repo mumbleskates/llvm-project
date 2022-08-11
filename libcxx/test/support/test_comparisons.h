@@ -32,14 +32,14 @@
 
 // Test the six basic comparison operators for ordered values.
 template <class T, class U = T>
-TEST_CONSTEXPR_CXX14 bool testComparisons(const T& t1, const U& t2, bool isEqual, bool isLess) {
+_LIBCPP_NODISCARD TEST_CONSTEXPR_CXX14 bool testComparisons(const T& t1, const U& t2, bool isEqual, bool isLess) {
     bool isGreater = !isEqual && !isLess;
     return testComparisonsComplete(t1, t2, isEqual, isLess, isGreater);
 }
 
 // Test the consistency of the six basic comparison operators for values that are ordered or unordered.
 template <class T, class U = T>
-TEST_CONSTEXPR_CXX14 bool testComparisonsComplete(const T& t1, const U& t2, bool isEqual, bool isLess, bool isGreater) {
+_LIBCPP_NODISCARD TEST_CONSTEXPR_CXX14 bool testComparisonsComplete(const T& t1, const U& t2, bool isEqual, bool isLess, bool isGreater) {
     assert(((isEqual ? 1 : 0) + (isLess ? 1 : 0) + (isGreater ? 1 : 0) <= 1) &&
            "at most one of isEqual, isLess, and isGreater can be true");
     if (isEqual) {

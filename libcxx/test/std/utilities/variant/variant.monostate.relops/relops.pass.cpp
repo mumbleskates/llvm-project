@@ -18,6 +18,7 @@
 // constexpr bool operator!=(monostate, monostate) noexcept { return false; }
 // constexpr strong_ordering operator<=>(monostate, monostate) noexcept { return strong_ordering::equal; } // since C++20
 
+#include <cassert>
 #include <variant>
 
 #include "test_comparisons.h"
@@ -27,11 +28,11 @@ constexpr bool test() {
   using M = std::monostate;
   constexpr M m1{};
   constexpr M m2{};
-  testComparisons(m1, m2, /*isEqual*/ true, /*isLess*/ false);
+  assert(testComparisons(m1, m2, /*isEqual*/ true, /*isLess*/ false));
   AssertComparisonsAreNoexcept<M>();
 
 #if TEST_STD_VER > 17
-  testOrder(m1, m2, std::strong_ordering::equal);
+  assert(testOrder(m1, m2, std::strong_ordering::equal));
   AssertOrderAreNoexcept<M>();
 #endif // TEST_STD_VER > 17
 

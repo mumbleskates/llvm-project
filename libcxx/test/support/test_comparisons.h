@@ -96,6 +96,7 @@ testComparisonsComplete(const T& t1, const U& t2, bool isEqual, bool isLess, boo
 // Test the six basic comparison operators for ordered values.
 template <class T, class U = T>
 TEST_NODISCARD TEST_CONSTEXPR_CXX14 bool testComparisons(const T& t1, const U& t2, bool isEqual, bool isLess) {
+    assert(!(isEqual && isLess) && "isEqual and isLess cannot be both true");
     bool isGreater = !isEqual && !isLess;
     return testComparisonsComplete(t1, t2, isEqual, isLess, isGreater);
 }

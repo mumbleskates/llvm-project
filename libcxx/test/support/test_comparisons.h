@@ -103,7 +103,7 @@ TEST_NODISCARD TEST_CONSTEXPR_CXX14 bool testComparisons(const T& t1, const U& t
 
 //  Easy call when you can init from something already comparable.
 template <class T, class Param>
-TEST_CONSTEXPR_CXX14 bool testComparisonsValues(Param val1, Param val2)
+TEST_NODISCARD TEST_CONSTEXPR_CXX14 bool testComparisonsValues(Param val1, Param val2)
 {
     const bool isEqual   = val1 == val2;
     const bool isLess    = val1 <  val2;
@@ -157,7 +157,7 @@ constexpr void AssertOrderReturn() {
 }
 
 template <class Order, class T, class U = T>
-constexpr bool testOrder(const T& t1, const U& t2, Order order) {
+TEST_NODISCARD constexpr bool testOrder(const T& t1, const U& t2, Order order) {
     bool equal   = order == Order::equivalent;
     bool less    = order == Order::less;
     bool greater = order == Order::greater;
@@ -166,7 +166,7 @@ constexpr bool testOrder(const T& t1, const U& t2, Order order) {
 }
 
 template <class T, class Param>
-constexpr bool testOrderValues(Param val1, Param val2) {
+TEST_NODISCARD constexpr bool testOrderValues(Param val1, Param val2) {
   return testOrder(T(val1), T(val2), val1 <=> val2);
 }
 
@@ -174,7 +174,7 @@ constexpr bool testOrderValues(Param val1, Param val2) {
 
 //  Test all two comparison operations for sanity
 template <class T, class U = T>
-TEST_CONSTEXPR_CXX14 bool testEquality(const T& t1, const U& t2, bool isEqual)
+TEST_NODISCARD TEST_CONSTEXPR_CXX14 bool testEquality(const T& t1, const U& t2, bool isEqual)
 {
     if (isEqual)
         {
@@ -196,7 +196,7 @@ TEST_CONSTEXPR_CXX14 bool testEquality(const T& t1, const U& t2, bool isEqual)
 
 //  Easy call when you can init from something already comparable.
 template <class T, class Param>
-TEST_CONSTEXPR_CXX14 bool testEqualityValues(Param val1, Param val2)
+TEST_NODISCARD TEST_CONSTEXPR_CXX14 bool testEqualityValues(Param val1, Param val2)
 {
     const bool isEqual = val1 == val2;
 

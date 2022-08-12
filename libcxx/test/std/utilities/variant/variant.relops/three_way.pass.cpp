@@ -139,6 +139,53 @@ constexpr bool test_three_way() {
   return true;
 }
 
+// SFINAE tests
+template <class T, class U = T>
+concept has_three_way_op = requires (T& t, U& u) { t <=> u; };
+
+// std::three_way_comparable is a more stringent requirement that demands
+// operator== and a few other things.
+using std::three_way_comparable;
+
+struct HasSimpleOrdering {
+  constexpr bool operator==(const HasSimpleOrdering&) const;
+  constexpr bool operator<(const HasSimpleOrdering&) const;
+};
+
+struct HasOnlySpaceship {
+  constexpr bool operator==(const HasOnlySpaceship&) const = delete;
+  constexpr std::weak_ordering operator<=>(const HasOnlySpaceship&) const;
+};
+
+struct HasFullOrdering {
+  constexpr bool operator==(const HasFullOrdering&) const;
+  constexpr std::weak_ordering operator<=>(const HasFullOrdering&) const;
+};
+
+// operator<=> must resolve the return types of all its union types'
+// operator<=>s to determine its own return type, so it is detectable by SFINAE
+static_assert(!has_three_way_op<HasSimpleOrdering>);
+static_assert(!has_three_way_op<std::variant<int, HasSimpleOrdering>>);
+
+static_assert(!three_way_comparable<HasSimpleOrdering>);
+static_assert(!three_way_comparable<std::variant<int, HasSimpleOrdering>>);
+
+static_assert( has_three_way_op<HasOnlySpaceship>);
+static_assert( has_three_way_op<std::variant<int, HasOnlySpaceship>>);
+
+// variants containing types with unavailable operator== still exist but will
+// generate a compilation error if their operator== is invoked, so the variant
+// type here participates when asked for operator== and operator<=> even though
+// it would actually fail.
+static_assert(!three_way_comparable<HasOnlySpaceship>);
+static_assert( three_way_comparable<std::variant<int, HasOnlySpaceship>>);
+
+static_assert( has_three_way_op<HasFullOrdering>);
+static_assert( has_three_way_op<std::variant<int, HasFullOrdering>>);
+
+static_assert( three_way_comparable<HasFullOrdering>);
+static_assert( three_way_comparable<std::variant<int, HasFullOrdering>>);
+
 int main(int, char**) {
   test_three_way();
   static_assert(test_three_way());
